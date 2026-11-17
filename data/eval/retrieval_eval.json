@@ -1,0 +1,78 @@
+{
+  "version": "1.0",
+  "description": "Support KB retrieval benchmark evaluating lexical and semantic/paraphrase recall before and after live Kafka replay switchover.",
+  "queries": [
+    {
+      "id": "Q01",
+      "category": "lexical",
+      "question": "What is the maximum SAML clock skew tolerance and where can admins widen it to 180 seconds?",
+      "expected_doc_id": "KB-001"
+    },
+    {
+      "id": "Q02",
+      "category": "lexical",
+      "question": "How does dual-secret rotation format the X-Webhook-Signature HMAC-SHA256 header?",
+      "expected_doc_id": "KB-002"
+    },
+    {
+      "id": "Q03",
+      "category": "lexical",
+      "question": "What are the Pro and Enterprise API rate limits and how should Kafka consumers handle HTTP 429 Retry-After?",
+      "expected_doc_id": "KB-003"
+    },
+    {
+      "id": "Q04",
+      "category": "lexical",
+      "question": "How does KIP-932 Share Group per-record acknowledgement allow more workers than partitions?",
+      "expected_doc_id": "KB-005"
+    },
+    {
+      "id": "Q05",
+      "category": "lexical",
+      "question": "Why does SCIM 2.0 directory sync return HTTP 409 Conflict on mixed-case emails?",
+      "expected_doc_id": "KB-008"
+    },
+    {
+      "id": "Q06",
+      "category": "semantic_paraphrase",
+      "question": "Employees are stuck in an Okta signon redirect loop after our identity server clock drifted.",
+      "expected_doc_id": "KB-001"
+    },
+    {
+      "id": "Q07",
+      "category": "semantic_paraphrase",
+      "question": "Callback payload verification breaks right when we roll over our signing key.",
+      "expected_doc_id": "KB-002"
+    },
+    {
+      "id": "Q08",
+      "category": "semantic_paraphrase",
+      "question": "Our client requests are getting throttled because burst quota ran out; what jitter retry strategy is required?",
+      "expected_doc_id": "KB-003"
+    },
+    {
+      "id": "Q09",
+      "category": "semantic_paraphrase",
+      "question": "European customer was charged tax because they forgot their registration ID and wants a credit receipt.",
+      "expected_doc_id": "KB-004"
+    },
+    {
+      "id": "Q10",
+      "category": "semantic_paraphrase",
+      "question": "A customer submitted a personal data right to be forgotten deletion request under privacy compliance rules.",
+      "expected_doc_id": "KB-006"
+    },
+    {
+      "id": "Q11",
+      "category": "semantic_paraphrase",
+      "question": "An engineer accidentally exposed a live secret token in a public GitHub repo; how fast does revocation propagate?",
+      "expected_doc_id": "KB-007"
+    },
+    {
+      "id": "Q12",
+      "category": "semantic_paraphrase",
+      "question": "Removed staff still have access because group membership changes from the corporate directory are delayed.",
+      "expected_doc_id": "KB-008"
+    }
+  ]
+}
