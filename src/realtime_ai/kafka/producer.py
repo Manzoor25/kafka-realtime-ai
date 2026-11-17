@@ -146,3 +146,6 @@ class EventProducer:
     def flush(self, timeout: float = 10.0) -> None:
         if self._producer is not None:
             self._producer.flush(timeout=timeout)
+
+    def close(self, timeout: float = 5.0) -> None:
+        self.flush(timeout=timeout)

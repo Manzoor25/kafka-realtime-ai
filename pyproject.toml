@@ -42,6 +42,7 @@ packages = ["src/realtime_ai"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+asyncio_default_fixture_loop_scope = "function"
 markers = [
   "integration: tests requiring live Kafka/Qdrant or full pipeline orchestration",
   "docker_e2e: tests requiring the running 3-broker Docker Compose stack",
