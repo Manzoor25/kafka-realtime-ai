@@ -1,0 +1,109 @@
+{
+  "uid": "krai-audit-cost",
+  "title": "Kafka Real-Time AI — Compliance Audit & Token Cost Dashboard",
+  "description": "Built directly from compliance topic ai.audit.events.v1 (7-year retention) via AuditCostExporter",
+  "tags": ["kafka", "compliance", "audit", "llm-cost"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Cumulative Estimated Spend (USD from ai.audit.events.v1)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(krai_audit_estimated_cost_usd_total)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 5
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Total Audited Tokens (Prompt vs Completion)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (token_type) (krai_audit_tokens_total)",
+          "legendFormat": "{{token_type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Compliance Audit Records Logged (7-Year Retention)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 10, "x": 14, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (operation, status) (krai_audit_records_total)",
+          "legendFormat": "{{operation}} ({{status}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Estimated Cost Breakdown by Model Version & Stage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (model_version, stage) (krai_audit_estimated_cost_usd_total)",
+          "legendFormat": "{{model_version}} [{{stage}}]",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 6 } }
+    },
+    {
+      "id": 5,
+      "title": "Token Velocity by Pipeline Stage (tokens/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (stage, token_type) (rate(krai_audit_tokens_total[1m]) * 60)",
+          "legendFormat": "{{stage}} ({{token_type}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Audited Model Call Latency p50 & p95 by Stage (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(krai_audit_stage_latency_ms_bucket[5m])) by (le, stage))",
+          "legendFormat": "{{stage}} p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(krai_audit_stage_latency_ms_bucket[5m])) by (le, stage))",
+          "legendFormat": "{{stage}} p95",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    }
+  ]
+}

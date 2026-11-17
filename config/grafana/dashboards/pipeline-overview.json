@@ -1,0 +1,149 @@
+{
+  "uid": "krai-pipeline-overview",
+  "title": "Kafka Real-Time AI — Streaming Freshness & KIP-932 Agents",
+  "tags": ["kafka", "rag", "kip-932", "qdrant"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Latest End-to-End KB Freshness (ms)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "max(krai_kb_last_freshness_ms)", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 2000 },
+              { "color": "red", "value": 5000 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "KB Freshness Quantiles (p50 / p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 10, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(krai_kb_freshness_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p50 Freshness",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(krai_kb_freshness_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95 Freshness",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 3,
+      "title": "Human Approval Queue by Status",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (status) (krai_human_approvals_by_status)",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "KIP-932 Share Group Triage Events by Worker Instance (4 Workers > 2 Partitions)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (instance, outcome) (increase(krai_agent_events_total{agent=\"triage\"}[2m]))",
+          "legendFormat": "{{instance}} ({{outcome}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "PII Entities Redacted Before Embedding",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (pii_type) (krai_pii_redactions_total)",
+          "legendFormat": "{{pii_type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Resilience: Consumer Paused / Retries / DLQ",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "max(krai_consumer_paused)",
+          "legendFormat": "Consumer Paused",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(krai_llm_retries_total[2m]))",
+          "legendFormat": "LLM Retries (2m)",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(krai_dlq_events_total)",
+          "legendFormat": "DLQ Total",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Qdrant Idempotent Vector Chunks Upserted by Model Version",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (collection, embedding_model, embedding_version) (krai_vector_chunks_upserted_total)",
+          "legendFormat": "{{collection}} ({{embedding_model}} / {{embedding_version}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Live QA Requests by Active Embedding Version",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (embedding_version, status) (rate(krai_qa_requests_total[1m]))",
+          "legendFormat": "{{embedding_version}} ({{status}})",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

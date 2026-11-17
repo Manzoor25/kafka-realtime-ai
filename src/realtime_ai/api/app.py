@@ -32,7 +32,6 @@ from realtime_ai.providers.resilient import ResilientAIProvider
 from realtime_ai.schemas.models import (
     Citation,
     KbDocumentRawEvent,
-    SupportHumanApprovalStateEvent,
     SupportReplyApprovedEvent,
     SupportTicketCreatedEvent,
     now_ms,
