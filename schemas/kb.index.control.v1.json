@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KbIndexControlEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "alias_name",
+    "collection_name",
+    "embedding_model",
+    "embedding_version",
+    "dimensions",
+    "switched_at_ms",
+    "reason"
+  ],
+  "properties": {
+    "alias_name": { "type": "string", "minLength": 1 },
+    "collection_name": { "type": "string", "minLength": 1 },
+    "embedding_model": { "type": "string", "minLength": 1 },
+    "embedding_version": { "type": "string", "minLength": 1 },
+    "dimensions": { "type": "integer", "minimum": 1 },
+    "switched_at_ms": { "type": "integer", "minimum": 0 },
+    "reason": { "type": "string" }
+  }
+}

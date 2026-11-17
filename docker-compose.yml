@@ -125,7 +125,7 @@ services:
           --config min.insync.replicas=2
         /opt/kafka/bin/kafka-configs.sh --bootstrap-server kafka-1:9092 \
           --entity-type groups --entity-name sg-triage-workers --alter \
-          --add-config share.auto.offset.reset=earliest,share.record.lock.duration.ms=20000 || true
+          --add-config share.auto.offset.reset=earliest,share.record.lock.duration.ms=20000,share.delivery.count.limit=10 || true
         echo "Kafka cluster initialization complete."
 
   schema-registry:

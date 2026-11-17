@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KbIndexTelemetryEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "doc_id",
+    "event_id",
+    "op",
+    "collection_name",
+    "embedding_model",
+    "embedding_version",
+    "chunks_upserted",
+    "source_ts_ms",
+    "indexed_ts_ms",
+    "freshness_ms"
+  ],
+  "properties": {
+    "doc_id": { "type": "string", "minLength": 1 },
+    "event_id": { "type": "string" },
+    "op": { "type": "string", "enum": ["upsert", "delete"] },
+    "collection_name": { "type": "string" },
+    "embedding_model": { "type": "string" },
+    "embedding_version": { "type": "string" },
+    "chunks_upserted": { "type": "integer", "minimum": 0 },
+    "source_ts_ms": { "type": "integer", "minimum": 0 },
+    "indexed_ts_ms": { "type": "integer", "minimum": 0 },
+    "freshness_ms": { "type": "number", "minimum": 0 }
+  }
+}

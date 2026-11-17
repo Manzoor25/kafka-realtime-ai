@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SupportHumanApprovalStateEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ticket_id",
+    "draft_id",
+    "revision",
+    "status",
+    "customer_id",
+    "subject",
+    "urgency",
+    "category",
+    "proposed_reply",
+    "final_reply",
+    "citations",
+    "reviewer_notes",
+    "human_actor",
+    "human_comment",
+    "queued_ts_ms",
+    "decided_ts_ms"
+  ],
+  "properties": {
+    "ticket_id": { "type": "string", "minLength": 1 },
+    "draft_id": { "type": "string", "minLength": 1 },
+    "revision": { "type": "integer", "minimum": 1 },
+    "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+    "customer_id": { "type": "string" },
+    "subject": { "type": "string" },
+    "urgency": { "type": "string" },
+    "category": { "type": "string" },
+    "proposed_reply": { "type": "string" },
+    "final_reply": { "type": ["string", "null"] },
+    "citations": { "type": "array", "items": { "type": "object" } },
+    "reviewer_notes": { "type": "string" },
+    "human_actor": { "type": ["string", "null"] },
+    "human_comment": { "type": ["string", "null"] },
+    "queued_ts_ms": { "type": "integer", "minimum": 0 },
+    "decided_ts_ms": { "type": ["integer", "null"] }
+  }
+}

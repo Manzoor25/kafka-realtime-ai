@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SupportAgentTriageEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ticket_id",
+    "triage_id",
+    "customer_id",
+    "account_tier",
+    "subject",
+    "ticket_body_redacted",
+    "category",
+    "urgency",
+    "sentiment",
+    "summary",
+    "search_query",
+    "requested_tools",
+    "worker_id",
+    "delivery_count",
+    "model_version",
+    "created_ts_ms"
+  ],
+  "properties": {
+    "ticket_id": { "type": "string", "minLength": 1 },
+    "triage_id": { "type": "string", "minLength": 1 },
+    "customer_id": { "type": "string" },
+    "account_tier": { "type": "string" },
+    "subject": { "type": "string" },
+    "ticket_body_redacted": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["auth_sso", "billing_refund", "api_webhooks", "rate_limits", "security_privacy", "general"]
+    },
+    "urgency": { "type": "string", "enum": ["p1_critical", "p2_high", "p3_normal", "p4_low"] },
+    "sentiment": { "type": "string", "enum": ["frustrated", "urgent", "neutral", "positive"] },
+    "summary": { "type": "string" },
+    "search_query": { "type": "string" },
+    "requested_tools": { "type": "array", "items": { "type": "string" } },
+    "worker_id": { "type": "string" },
+    "delivery_count": { "type": "integer", "minimum": 1 },
+    "model_version": { "type": "string" },
+    "created_ts_ms": { "type": "integer", "minimum": 0 }
+  }
+}

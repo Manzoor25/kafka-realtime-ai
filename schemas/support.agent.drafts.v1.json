@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SupportAgentDraftEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "draft_id",
+    "ticket_id",
+    "customer_id",
+    "subject",
+    "ticket_body_redacted",
+    "revision",
+    "category",
+    "urgency",
+    "reply_body",
+    "citations",
+    "tool_context_summary",
+    "model_version",
+    "created_ts_ms"
+  ],
+  "properties": {
+    "draft_id": { "type": "string", "minLength": 1 },
+    "ticket_id": { "type": "string", "minLength": 1 },
+    "customer_id": { "type": "string" },
+    "subject": { "type": "string" },
+    "ticket_body_redacted": { "type": "string" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "category": { "type": "string" },
+    "urgency": { "type": "string" },
+    "reply_body": { "type": "string", "minLength": 1 },
+    "citations": { "type": "array", "items": { "type": "object" } },
+    "tool_context_summary": { "type": "string" },
+    "model_version": { "type": "string" },
+    "created_ts_ms": { "type": "integer", "minimum": 0 }
+  }
+}

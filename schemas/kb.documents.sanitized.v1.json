@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KbDocumentSanitizedEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "doc_id",
+    "event_id",
+    "title",
+    "sanitized_content",
+    "pii_redactions_count",
+    "pii_types_found",
+    "source_uri",
+    "source_ts_ms",
+    "redacted_ts_ms"
+  ],
+  "properties": {
+    "doc_id": { "type": "string", "minLength": 1 },
+    "event_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "sanitized_content": { "type": "string" },
+    "pii_redactions_count": { "type": "integer", "minimum": 0 },
+    "pii_types_found": { "type": "array", "items": { "type": "string" } },
+    "source_uri": { "type": "string" },
+    "source_ts_ms": { "type": "integer", "minimum": 0 },
+    "redacted_ts_ms": { "type": "integer", "minimum": 0 }
+  }
+}

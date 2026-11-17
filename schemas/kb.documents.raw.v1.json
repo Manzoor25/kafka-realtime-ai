@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KbDocumentRawEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["doc_id", "event_id", "op", "title", "content", "source_uri", "source_ts_ms"],
+  "properties": {
+    "doc_id": { "type": "string", "minLength": 1 },
+    "event_id": { "type": "string", "minLength": 1 },
+    "op": { "type": "string", "enum": ["create", "update"] },
+    "title": { "type": "string" },
+    "content": { "type": "string" },
+    "source_uri": { "type": "string" },
+    "source_ts_ms": { "type": "integer", "minimum": 0 }
+  }
+}

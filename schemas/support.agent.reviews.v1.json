@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SupportAgentReviewEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_id",
+    "draft_id",
+    "ticket_id",
+    "revision",
+    "verdict",
+    "quality_score",
+    "policy_flags",
+    "feedback",
+    "model_version",
+    "reviewed_ts_ms"
+  ],
+  "properties": {
+    "review_id": { "type": "string", "minLength": 1 },
+    "draft_id": { "type": "string", "minLength": 1 },
+    "ticket_id": { "type": "string", "minLength": 1 },
+    "revision": { "type": "integer", "minimum": 1 },
+    "verdict": { "type": "string", "enum": ["ready_for_human", "needs_revision"] },
+    "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "policy_flags": { "type": "array", "items": { "type": "string" } },
+    "feedback": { "type": "string" },
+    "draft_snapshot": { "type": "object" },
+    "model_version": { "type": "string" },
+    "reviewed_ts_ms": { "type": "integer", "minimum": 0 }
+  }
+}

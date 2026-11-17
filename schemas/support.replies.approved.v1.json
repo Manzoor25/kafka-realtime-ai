@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SupportReplyApprovedEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reply_id",
+    "ticket_id",
+    "draft_id",
+    "customer_id",
+    "subject",
+    "final_reply",
+    "citations",
+    "approved_by",
+    "sent_ts_ms"
+  ],
+  "properties": {
+    "reply_id": { "type": "string", "minLength": 1 },
+    "ticket_id": { "type": "string", "minLength": 1 },
+    "draft_id": { "type": "string", "minLength": 1 },
+    "customer_id": { "type": "string" },
+    "subject": { "type": "string" },
+    "final_reply": { "type": "string", "minLength": 1 },
+    "citations": { "type": "array", "items": { "type": "object" } },
+    "approved_by": { "type": "string", "minLength": 1 },
+    "sent_ts_ms": { "type": "integer", "minimum": 0 }
+  }
+}
