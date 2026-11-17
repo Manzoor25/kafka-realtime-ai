@@ -270,12 +270,14 @@ class LocalCPUProvider:
     def _synthesize_grounded_answer(user_prompt: str) -> str:
         citations = list(dict.fromkeys(_DOC_CITATION_RE.findall(user_prompt)))
         cite_tag = f" [{citations[0]}]" if citations else ""
+        context_part = user_prompt.split("CONTEXT:", 1)[-1] if "CONTEXT:" in user_prompt else user_prompt
         context_lines = [
             ln.strip()
-            for ln in user_prompt.splitlines()
-            if ln.strip() and not ln.strip().startswith(("QUESTION:", "TICKET:", "INSTRUCTIONS:"))
+            for ln in context_part.splitlines()
+            if ln.strip()
+            and not ln.strip().startswith(("[KB-", "QUESTION:", "TICKET:", "SUBJECT:", "CUSTOMER MESSAGE:", "RETRIEVED CONTEXT", "INSTRUCTIONS:"))
         ]
-        key_fact = context_lines[-1][:240] if context_lines else "Please follow our support runbook."
+        key_fact = context_lines[0][:240] if context_lines else "Please follow our support runbook."
         return (
             f"Based on our latest knowledge base{cite_tag}, {key_fact} "
             f"Let us know if you need any further assistance{cite_tag}."

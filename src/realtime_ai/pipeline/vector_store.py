@@ -53,6 +53,7 @@ class QdrantVectorRepository:
             self.client = QdrantClient(path=local_path)
         else:
             self.client = QdrantClient(url=url, timeout=15.0)
+        self._is_in_memory = local_path == ":memory:"
         self.active_alias = active_alias
         self._meta_lock = threading.RLock()
         self._collection_meta: dict[str, tuple[str, str, int]] = {}
@@ -87,11 +88,12 @@ class QdrantVectorRepository:
                     size=dimensions, distance=qmodels.Distance.COSINE
                 ),
             )
-            self.client.create_payload_index(
-                collection_name=collection_name,
-                field_name="doc_id",
-                field_schema=qmodels.PayloadSchemaType.KEYWORD,
-            )
+            if not self._is_in_memory:
+                self.client.create_payload_index(
+                    collection_name=collection_name,
+                    field_name="doc_id",
+                    field_schema=qmodels.PayloadSchemaType.KEYWORD,
+                )
             logger.info(
                 "Created Qdrant collection '%s' (dim=%d, model=%s, version=%s)",
                 collection_name,

@@ -191,15 +191,16 @@ class TriageAgent:
 
         if self.mid_call_hook is not None:
             self.mid_call_hook(ticket, record)
-        if self._extra_call_delay_s > 0:
+        slow_marker_s = 8.0 if "[SIMULATE_SLOW_CALL_8S]" in ticket.body else self._extra_call_delay_s
+        if slow_marker_s > 0:
             logger.info(
-                "Worker %s starting slow triage LLM call (%.1fs) for ticket=%s (delivery_count=%d)",
+                "MID_CALL_IN_PROGRESS worker=%s ticket=%s delivery_count=%d sleep=%.1fs",
                 self.worker_id,
-                self._extra_call_delay_s,
                 ticket.ticket_id,
                 record.delivery_count,
+                slow_marker_s,
             )
-            time.sleep(self._extra_call_delay_s)
+            time.sleep(slow_marker_s)
 
         sys_prompt = (
             "You are a senior B2B SaaS support triage AI. Classify the support ticket into JSON "
