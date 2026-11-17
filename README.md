@@ -219,11 +219,12 @@ make demo-live-reembed
 
 ## Measured Retrieval Evaluation & Freshness
 
-Running `make eval` (`scripts/evaluate_retrieval.py`) evaluates our 12-query support benchmark (`data/eval/retrieval_eval.json`: 5 lexical queries + 7 semantic paraphrase queries) before and after replaying `kb.documents.sanitized.v1` into a second index:
+Running `make eval` (`scripts/evaluate_retrieval.py`) and the live 3-broker Docker Compose E2E suite evaluates our 12-query support benchmark (`data/eval/retrieval_eval.json`: 5 lexical queries + 7 semantic paraphrase queries) and pipeline latencies across both the real 3-broker Kafka 4.4.0 + Ollama + Qdrant stack and the deterministic CPU harness:
 
-| Environment | Before Switch (`v1`, 384-dim) | Replay / Cutover Latency | After Switch (`v2`, 768-dim) | Recall@1 Delta |
-| :--- | :--- | :--- | :--- | :--- |
-| **Local Deterministic Harness (`LocalCPUProvider`)** | `local-hash-v1`: Recall@1 **75.00%**, Recall@3 **100.00%**, MRR@3 **0.8750** | Replay `22.7 ms` (8 docs / 31 chunks), atomic cutover **`0.17 ms`** | `local-semantic-v2`: Recall@1 **100.00%**, Recall@3 **100.00%**, MRR@3 **1.0000** | **+25.00%** |
+| Environment | Measured Pipeline Freshness | Before Switch (`v1`, 384-dim) | Replay / Atomic Cutover | After Switch (`v2`, 768-dim) | Live QA Uptime Across Switch |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **3-Broker Kafka 4.4.0 + Ollama + Qdrant (Docker E2E)** | Incremental single-doc: **`74.0 ms`** (`p50 = 2.52 s`, `p95 = 4.90 s` across initial 9-doc cold-start batch) | `all-minilm:22m`: Recall@1 **100.00%**, MRR@3 **1.0000** | Replay `13.40 s` (31 chunks on CPU Ollama), atomic cutover **`12.71 ms`** | `nomic-embed-text:v1.5`: Recall@1 **100.00%**, MRR@3 **1.0000** | **100.0% (`0` errors across 36 concurrent `/v1/qa` calls, mean `313.7 ms`)** |
+| **Deterministic Local Harness (`LocalCPUProvider`)** | In-process synchronous `< 5 ms` | `local-hash-v1`: Recall@1 **75.00%**, Recall@3 **100.00%**, MRR@3 **0.8750** | Replay `22.7 ms` (8 docs / 31 chunks), atomic cutover **`0.17 ms`** | `local-semantic-v2`: Recall@1 **100.00%**, Recall@3 **100.00%**, MRR@3 **1.0000** (**+25.00%** Recall@1) | **100.0% (`0` errors)** |
 
 ---
 
