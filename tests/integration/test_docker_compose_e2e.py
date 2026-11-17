@@ -72,7 +72,8 @@ def test_live_docker_compose_streaming_rag_agents_karapace_prometheus_and_grafan
                     assert "SecretShouldBeScrubbed12345" not in c["snippet"]
                     if c["doc_id"] == doc_id:
                         assert "[REDACTED_EMAIL]" in c["snippet"]
-                        assert "[REDACTED_API_KEY]" in c["snippet"]
+                        assert "[REDACTED_PHONE]" in c["snippet"]
+                        assert "[REDACTED_SECRET]" in c["snippet"]
                 break
             time.sleep(0.25)
 
