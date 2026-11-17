@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kafka-realtime-ai"
+version = "0.1.0"
+description = "Real-time streaming RAG and event-driven multi-agent support triage on Apache Kafka 4.4 (KRaft + KIP-932 Share Groups)"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [
+  { name = "Manzooruddin Mohammed" }
+]
+dependencies = [
+  "confluent-kafka==2.16.1",
+  "fastapi==0.162.2",
+  "uvicorn[standard]==0.54.0",
+  "pydantic==2.14.3",
+  "pydantic-settings==2.9.1",
+  "qdrant-client==1.20.0",
+  "httpx==0.28.1",
+  "jsonschema==4.26.0",
+  "prometheus-client==0.26.0",
+  "jinja2==3.1.6",
+  "python-multipart==0.0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.3.5",
+  "pytest-asyncio==0.26.0",
+  "ruff==0.11.8",
+]
+
+[project.scripts]
+realtime-ai = "realtime_ai.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/realtime_ai"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+  "integration: tests requiring live Kafka/Qdrant or full pipeline orchestration",
+  "docker_e2e: tests requiring the running 3-broker Docker Compose stack",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
