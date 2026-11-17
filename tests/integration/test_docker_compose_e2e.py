@@ -69,7 +69,10 @@ def test_live_docker_compose_streaming_rag_agents_karapace_prometheus_and_grafan
                 # Confirm PII was scrubbed before embedding & retrieval
                 for c in qa_body["citations"]:
                     assert "secops@acme.example" not in c["snippet"]
-                    assert "sk-live-" not in c["snippet"]
+                    assert "SecretShouldBeScrubbed12345" not in c["snippet"]
+                    if c["doc_id"] == doc_id:
+                        assert "[REDACTED_EMAIL]" in c["snippet"]
+                        assert "[REDACTED_API_KEY]" in c["snippet"]
                 break
             time.sleep(0.25)
 
@@ -80,6 +83,26 @@ def test_live_docker_compose_streaming_rag_agents_karapace_prometheus_and_grafan
             f"pipeline_freshness={freshness}"
         )
 
+        # Clean up temporary E2E doc via Kafka tombstone and verify vector purge
+        del_resp = client.delete(f"{api_url}/v1/kb/documents/{doc_id}")
+        assert del_resp.status_code == 202
+        purge_deadline = time.monotonic() + 20.0
+        purged = False
+        while time.monotonic() < purge_deadline:
+            qa_after = client.post(
+                f"{api_url}/v1/qa",
+                json={
+                    "question": f"How should rolling patch {unique_code} be applied?",
+                    "top_k": 3,
+                    "retrieval_only": True,
+                },
+            ).json()
+            if all(c["doc_id"] != doc_id for c in qa_after["citations"]):
+                purged = True
+                break
+            time.sleep(0.25)
+        assert purged, f"Tombstone did not purge {doc_id} from Qdrant within 20s"
+
         # 3. Submit a support ticket -> KIP-932 Share Group triage -> tools -> drafter -> reviewer -> human approval
         ticket_id = f"TKT-E2E-{uuid.uuid4().hex[:6].upper()}"
         t_ticket = time.perf_counter()
@@ -88,7 +111,8 @@ def test_live_docker_compose_streaming_rag_agents_karapace_prometheus_and_grafan
             json={
                 "ticket_id": ticket_id,
                 "customer_id": "CUST-DOCKER-1",
-                "customer_tier": "enterprise",
+                "customer_email": "ops@docker-e2e.example",
+                "account_tier": "enterprise",
                 "subject": "SAML SSO clock skew login error",
                 "body": "Our Okta users fail SAML login with NotOnOrAfter clock skew error.",
             },

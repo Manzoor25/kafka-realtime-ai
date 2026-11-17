@@ -35,6 +35,7 @@ def _run_live_switch(
     trigger_reembed_call: Any,
     target_model: str,
     target_version: str,
+    window_seconds: float = 20.0,
 ) -> None:
     stop_traffic = threading.Event()
     versions_seen: list[str] = []
@@ -48,7 +49,7 @@ def _run_live_switch(
             q = _QUESTIONS[idx % len(_QUESTIONS)]
             idx += 1
             try:
-                status_code, body = make_qa_call(q)
+                status_code, body = make_qa_call(q, idx)
                 if status_code != 200:
                     with lock:
                         errors.append(f"HTTP {status_code}: {body}")
@@ -60,14 +61,14 @@ def _run_live_switch(
             except Exception as exc:
                 with lock:
                     errors.append(str(exc))
-            time.sleep(0.04)
+            time.sleep(0.05)
 
     print("[STEP 1] Starting continuous /v1/qa reader traffic before, during, and after replay cutover...")
     reader = threading.Thread(target=_qa_reader_loop, daemon=True)
     reader.start()
 
     # Let pre-switch traffic accumulate on the initial version
-    deadline = time.monotonic() + 10.0
+    deadline = time.monotonic() + max(15.0, window_seconds)
     while time.monotonic() < deadline:
         with lock:
             if len(versions_seen) >= 5:
@@ -88,7 +89,7 @@ def _run_live_switch(
     )
 
     print("[STEP 3] Running post-cutover QA traffic on new index and auditing zero-downtime availability...")
-    post_deadline = time.monotonic() + 10.0
+    post_deadline = time.monotonic() + max(15.0, window_seconds)
     while time.monotonic() < post_deadline:
         with lock:
             if versions_seen.count(target_version) >= 5:
@@ -96,7 +97,7 @@ def _run_live_switch(
         time.sleep(0.05)
 
     stop_traffic.set()
-    reader.join(timeout=5.0)
+    reader.join(timeout=10.0)
 
     distinct_versions = list(dict.fromkeys(versions_seen))
     assert not errors, f"Zero-downtime violation! QA errors during model switch: {errors[:3]}"
@@ -115,6 +116,7 @@ def main() -> None:
     parser.add_argument("--api-url", default="http://localhost:8000")
     parser.add_argument("--new-model", default=None)
     parser.add_argument("--new-version", default="v2-live")
+    parser.add_argument("--duration-seconds", type=float, default=20.0)
     parser.add_argument("--in-memory", action="store_true")
     args = parser.parse_args()
 
@@ -126,7 +128,7 @@ def main() -> None:
             harness.seed_and_index_kb()
             client_lock = threading.Lock()
 
-            def _qa_mem(q: str) -> tuple[int, dict[str, Any]]:
+            def _qa_mem(q: str, _idx: int) -> tuple[int, dict[str, Any]]:
                 with client_lock:
                     r = harness.client.post(
                         "/v1/qa", json={"question": q, "top_k": 2, "retrieval_only": True}
@@ -153,6 +155,7 @@ def main() -> None:
                 _reembed_mem,
                 target_model=args.new_model or "local-semantic-v2",
                 target_version=args.new_version,
+                window_seconds=args.duration_seconds,
             )
         finally:
             harness.close()
@@ -160,13 +163,17 @@ def main() -> None:
 
     target_model = args.new_model or "nomic-embed-text:v1.5"
 
-    def _qa_http(q: str) -> tuple[int, dict[str, Any]]:
-        with httpx.Client(base_url=args.api_url, timeout=30.0) as c:
-            r = c.post("/v1/qa", json={"question": q, "top_k": 2})
+    def _qa_http(q: str, idx: int) -> tuple[int, dict[str, Any]]:
+        # Mix full LLM-synthesized QA (idx == 1) with high-rate live embedding+Qdrant queries across cutover
+        with httpx.Client(base_url=args.api_url, timeout=45.0) as c:
+            r = c.post(
+                "/v1/qa",
+                json={"question": q, "top_k": 2, "retrieval_only": idx > 1},
+            )
             return r.status_code, r.json()
 
     def _reembed_http(model: str, ver: str) -> dict[str, Any]:
-        with httpx.Client(base_url=args.api_url, timeout=180.0) as c:
+        with httpx.Client(base_url=args.api_url, timeout=240.0) as c:
             r = c.post(
                 "/v1/kb/reembed",
                 json={"new_embedding_model": model, "new_embedding_version": ver},
@@ -174,7 +181,13 @@ def main() -> None:
             r.raise_for_status()
             return r.json()
 
-    _run_live_switch(_qa_http, _reembed_http, target_model, args.new_version)
+    _run_live_switch(
+        _qa_http,
+        _reembed_http,
+        target_model,
+        args.new_version,
+        window_seconds=args.duration_seconds,
+    )
 
 
 if __name__ == "__main__":

@@ -191,7 +191,7 @@ class TriageAgent:
 
         if self.mid_call_hook is not None:
             self.mid_call_hook(ticket, record)
-        slow_marker_s = 8.0 if "[SIMULATE_SLOW_CALL_8S]" in ticket.body else self._extra_call_delay_s
+        slow_marker_s = 10.0 if "[SIMULATE_SLOW_CALL_8S]" in ticket.body else self._extra_call_delay_s
         if slow_marker_s > 0:
             logger.info(
                 "MID_CALL_IN_PROGRESS worker=%s ticket=%s delivery_count=%d sleep=%.1fs",

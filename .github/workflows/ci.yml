@@ -88,11 +88,12 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Run live containerized failure demos (idempotent duplicate, live re-embed, SIGKILL share worker)
+      - name: Run live containerized failure demos (all 4 chaos scenarios on 3-broker stack)
         run: |
           python scripts/failure_demos/demo_3_duplicate_doc.py
           python scripts/failure_demos/demo_4_live_reembed.py --duration-seconds 8 --new-model all-minilm:22m --new-version v3-live
           python scripts/failure_demos/demo_2_kill_worker.py
+          python scripts/failure_demos/demo_1_llm_outage.py --outage-seconds 15 --tickets 3
 
       - name: Dump container diagnostics on failure
         if: failure()

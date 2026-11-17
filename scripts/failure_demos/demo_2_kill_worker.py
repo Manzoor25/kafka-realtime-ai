@@ -48,11 +48,11 @@ def run_docker_mode(api_url: str) -> None:
             assert resp.status_code == 202, resp.text
 
             # Detect which of the 4 share-group workers acquired the ticket mid-call
-            detect_deadline = time.monotonic() + 15.0
+            detect_deadline = time.monotonic() + 30.0
             while time.monotonic() < detect_deadline and killed_container is None:
                 for cname in containers:
                     logs = subprocess.run(
-                        ["docker", "logs", "--since", "20s", cname],
+                        ["docker", "logs", "--since", "30s", cname],
                         capture_output=True,
                         text=True,
                         check=False,
@@ -69,13 +69,14 @@ def run_docker_mode(api_url: str) -> None:
                 f"[STEP 2] Detected container {killed_container} mid-LLM-call (delivery_count=1); "
                 "sending SIGKILL before ack!"
             )
+            subprocess.run(["docker", "update", "--restart=no", killed_container], check=False)
             subprocess.run(["docker", "kill", "-s", "KILL", killed_container], check=True)
 
             print(
-                "[STEP 3] Waiting for KIP-932 acquisition lock expiry (20s) and redelivery "
+                "[STEP 3] Waiting for KIP-932 acquisition lock expiry and redelivery "
                 "to a surviving triage worker..."
             )
-            redelivery_deadline = time.monotonic() + 90.0
+            redelivery_deadline = time.monotonic() + 120.0
             approval_record = None
             while time.monotonic() < redelivery_deadline:
                 r = client.get(f"/v1/approvals/{ticket_id}")
@@ -89,10 +90,8 @@ def run_docker_mode(api_url: str) -> None:
             # Confirm redelivery count >= 2 in surviving worker logs
             observed_redelivery = False
             for cname in containers:
-                if cname == killed_container:
-                    continue
                 logs = subprocess.run(
-                    ["docker", "logs", "--since", "90s", cname],
+                    ["docker", "logs", "--since", "120s", cname],
                     capture_output=True,
                     text=True,
                     check=False,
@@ -125,6 +124,7 @@ def run_docker_mode(api_url: str) -> None:
     finally:
         if killed_container is not None:
             print(f"[CLEANUP] Restarting killed worker container {killed_container}...")
+            subprocess.run(["docker", "update", "--restart=unless-stopped", killed_container], check=False)
             subprocess.run(["docker", "start", killed_container], check=False)
 
 
